@@ -74,7 +74,9 @@ From our analysis, we can conclude that sex worker's BMI is negatively associate
 
 p value is very small (Prob (F-statistic): 1.56e-16), so we can reject H0. 
 
-coef for bmi is -0.0189.
+coef for bmi is -0.0189 and p value is very small
+
+r squared however tells us that only 4 percent is captured by the linear model. 
 
 
 
