@@ -1,21 +1,126 @@
 This week's assignment is to test a logistic regression model. 
 
-Data preparation for this assignment:
+1st part of the code
 
-1) If your response variable is categorical with more than two categories, you will need to collapse it down to two categories, or subset your data to select observations from 2 categories.
+```
+# -*- coding: utf-8 -*-
 
-2) If your response variable is quantitative, you will need to bin it into two categories.
+import numpy as numpy
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import seaborn 
+import matplotlib.pyplot as plt
+
+# bug fix for display formats to avoid run time errors
+pd.set_option('display.float_format', lambda x:'%.2f'%x)
+
+data = pd.read_csv('https://vincentarelbundock.github.io/Rdatasets/csv/causaldata/adult_services.csv')
+data.dropna(inplace=True)
+data = data.drop(columns=["Unnamed: 0"]
+```
+
+i'll take as a response variable "unsafe", its a binary variable where 1 stands for unprotected sex with client of any kind. lets investigate the relationship with worker's race.
+
+```
+# logistic regression 
+lreg1 = smf.logit(formula = 'unsafe ~ black', data = data).fit()
+print(lreg1.summary())
+# odds ratios
+print ("Odds Ratios")
+print (numpy.exp(lreg1.params))
+
+# odd ratios with 95% confidence intervals
+params = lreg1.params
+conf = lreg1.conf_int()
+conf['OR'] = params
+conf.columns = ['Lower CI', 'Upper CI', 'OR']
+print(numpy.exp(conf))
+
+```
+
+<img width="691" alt="image" src="https://user-images.githubusercontent.com/22098104/155791273-37a69da2-651c-46e9-bea0-2a123b3fd23e.png">
 
 
-The assignment:
-
-Write a blog entry that summarize in a few sentences 1) what you found, making sure you discuss the results for the associations between all of your explanatory variables and your response variable. Make sure to include statistical results (odds ratios, p-values, and 95% confidence intervals for the odds ratios) in your summary. 2) Report whether or not your results supported your hypothesis for the association between your primary explanatory variable and your response variable. 3) Discuss whether or not there was evidence of confounding for the association between your primary explanatory and the response variable (Hint: adding additional explanatory variables to your model one at a time will make it easier to identify which of the variables are confounding variables).  
-
-
-
-What to Submit: Write a blog entry and submit the URL for your blog. Your blog entry should include 1) the summary of your results that addresses parts 1-3 of the assignment, 2) the output from your logistic regression model.
+p value (0.037) is less than 0.05 so the relationship between these variables appears to be significant
+odds ratio (0.58) is < 1, which means that the worker is less likely to participate in an unsafe sex if they are black.
+95% CI = 0.34-0.97
 
 
-Example of how to write logistic regression results:
+now i'll add another variable: massage_cl 1 stands for Gave Client a Massage
 
-After adjusting for potential confounding factors (list them), the odds of having nicotine dependence were more than two times higher for participants with major depression than for participants without major depression (OR=2.36, 95% CI = 1.44-3.81, p=.0001). Age was also significantly associated with nicotine dependence, such that older older participants were significantly less likely to have nicotine dependence (OR= 0.81, 95% CI=0.40-0.93, p=.041).  
+```
+lreg2 = smf.logit(formula = 'unsafe ~ black + massage_cl', data = data).fit()
+print(lreg2.summary())
+
+# odd ratios with 95% confidence intervals
+params = lreg2.params
+conf = lreg2.conf_int()
+conf['OR'] = params
+conf.columns = ['Lower CI', 'Upper CI', 'OR']
+print(numpy.exp(conf))
+```
+
+<img width="682" alt="image" src="https://user-images.githubusercontent.com/22098104/155795080-0a65f1b6-4aac-43d6-b4ab-0e3bd3e2a526.png">
+
+the results suggest that if worker gave a massage it's likely that the sex will be safe (OR= 0.55, 95% CI=0.45-0.68, p=.0.0001)
+
+
+adjusting for other potential confounding factors
+
+1) customer being a regular
+```
+lreg2 = smf.logit(formula = 'unsafe ~ black + massage_cl + reg', data = data).fit()
+print(lreg2.summary())
+
+# odd ratios with 95% confidence intervals
+params = lreg2.params
+conf = lreg2.conf_int()
+conf['OR'] = params
+conf.columns = ['Lower CI', 'Upper CI', 'OR']
+print(numpy.exp(conf))
+```
+
+<img width="690" alt="image" src="https://user-images.githubusercontent.com/22098104/155797795-4cd6e9ea-431c-437c-98f1-83c01b34ce26.png">
+
+no statistical significance
+
+2) there was a second worker during the session
+
+provider_second
+
+```
+lreg2 = smf.logit(formula = 'unsafe ~ black + massage_cl + reg + provider_second', data = data).fit()
+print(lreg2.summary())
+
+# odd ratios with 95% confidence intervals
+params = lreg2.params
+conf = lreg2.conf_int()
+conf['OR'] = params
+conf.columns = ['Lower CI', 'Upper CI', 'OR']
+print(numpy.exp(conf))
+```
+
+<img width="723" alt="image" src="https://user-images.githubusercontent.com/22098104/155798444-2bf3020e-52c0-444f-abef-36a55ba99f6c.png">
+
+no statistical significance
+
+3) race of the client
+
+```
+lreg2 = smf.logit(formula = 'unsafe ~ black + massage_cl + reg + provider_second + black_cl', data = data).fit()
+print(lreg2.summary())
+
+# odd ratios with 95% confidence intervals
+params = lreg2.params
+conf = lreg2.conf_int()
+conf['OR'] = params
+conf.columns = ['Lower CI', 'Upper CI', 'OR']
+print(numpy.exp(conf))
+```
+
+<img width="734" alt="image" src="https://user-images.githubusercontent.com/22098104/155798812-79df54ab-6a1c-4fe4-a2e1-68afb1767b48.png">
+
+no statistical significance
+
+## To sum up, after adjusting for potential confounding factors (race of the client, second worker during the session, customer being a regular), the odds of having unsafe sex were 0.58 if sex worker's race is black (OR= 0.58, 95% CI= 0.34-0.97, p=0.037). Giving a massage was also significantly associated with having safe sex, such that if the massage was given people were significantly less likely to participate in unsafe sexual practices.
