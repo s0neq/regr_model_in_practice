@@ -125,4 +125,4 @@ no statistical significance
 
 ## To sum up, 
 
-after adjusting for potential confounding factors (race of the client, second worker during the session, customer being a regular), the odds of having unsafe sex were 0.58 if sex worker's race is black (OR= 0.58, 95% CI= 0.34-0.97, p=0.037). Giving a massage was also significantly associated with having safe sex, such that if the massage was given people were significantly less likely to participate in unsafe sexual practices.
+after adjusting for potential confounding factors (race of the client, second worker during the session, customer being a regular), the odds of having unsafe sex were 0.58 if sex worker's race is black (OR= 0.58, 95% CI= 0.34-0.97, p=0.037). Giving a massage was also significantly associated with having safe sex, such that if the massage was given people were significantly less likely to participate in unsafe sexual practices. (OR= 0.55, 95% CI=0.45-0.68, p=.0.0001)
